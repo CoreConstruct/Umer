@@ -1,0 +1,10 @@
+venv/
+uploads/
+temp/
+*.mp4
+*.jpg
+*.png
+*.body
+__pycache__/
+*.pyc
+.env

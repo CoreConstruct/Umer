@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignBridge — Learn ASL Sign Language</title>
+  <meta name="description" content="Learn American Sign Language with real-time MediaPipe hand detection. Guided lessons, quizzes, and live practice.">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ── NAV ───────────────────────────────────────────────────── -->
+<nav>
+  <div class="logo">Sign<span>Bridge</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('home')">Home</button>
+    <button class="nav-tab" onclick="showPage('learn')">Learn</button>
+    <button class="nav-tab" onclick="showPage('practice')">Practice</button>
+    <button class="nav-tab" onclick="showPage('profile')">Profile</button>
+    <button id="nav-admin" class="nav-tab" onclick="showPage('admin')" style="display:none">Admin</button>
+  </div>
+  <div class="nav-right">
+    <div class="streak">🔥 <span id="nav-streak">0</span></div>
+    <div class="level-badge" id="nav-level">—</div>
+    <button id="btn-login-nav"  class="btn-nav btn-nav-login"  onclick="openAuthModal('login')">Login</button>
+    <button id="btn-logout"     class="btn-nav btn-nav-logout" onclick="doLogout()" style="display:none">Logout</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════
+     HOME PAGE
+════════════════════════════════════════════════════════════ -->
+<div id="page-home" class="page active" style="padding-top:0;max-width:100%">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">✦ MediaPipe Real-time Hand Detection</div>
+    <h1>Learn <em>Sign Language</em><br>the modern way</h1>
+    <p>Guided lessons, live hand detection, quizzes and XP rewards. Whether you are deaf, hearing, beginner or expert — SignBridge is for you.</p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="showPage('learn')">Start Learning →</button>
+      <button class="btn-secondary" onclick="showPage('practice')">Open Practice Studio</button>
+    </div>
+  </div>
+
+  <div style="max-width:1100px;margin:0 auto;padding:0 2rem 4rem">
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">26</div><div class="stat-label">ASL Letters</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent2)">5</div><div class="stat-label">Learning Tracks</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent3)">50+</div><div class="stat-label">Signs & Phrases</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--gold)">Real-time</div><div class="stat-label">Hand Detection</div></div>
+    </div>
+
+    <!-- About ASL section -->
+    <div class="section-title">What is ASL?</div>
+    <div class="section-sub">American Sign Language — the language of the Deaf community</div>
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-icon">🤟</div>
+        <div class="about-title">American Sign Language</div>
+        <div class="about-text">ASL is a complete, complex language that uses signs made with the hands, combined with facial expressions and body posture. It is the primary language of many Deaf and hard-of-hearing people in the United States and Canada.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">👥</div>
+        <div class="about-title">The Deaf &amp; HoH Community</div>
+        <div class="about-text">Over 70 million Deaf people around the world use sign languages as their primary means of communication. The Deaf community has its own rich culture, history and traditions. Learning ASL is a gateway to understanding and connecting with this community.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🌍</div>
+        <div class="about-title">Why Learn Sign Language?</div>
+        <div class="about-text">Learning ASL breaks down communication barriers, promotes inclusion, and opens doors to new friendships. It benefits everyone — parents of Deaf children, healthcare workers, teachers, and anyone who wants to communicate across the hearing divide.</div>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🧠</div>
+        <div class="about-title">Cognitive Benefits</div>
+        <div class="about-text">Research shows that learning a visual language like ASL improves spatial reasoning, memory and multitasking. It also creates new neural pathways and has been shown to help with early literacy development in children.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Alphabet quick-look -->
+    <div class="section-title">ASL Alphabet</div>
+    <div class="section-sub">Click any letter to practice it immediately</div>
+    <div class="alpha-grid" id="alpha-grid"></div>
+
+    <div class="divider"></div>
+
+    <!-- Learning Tracks -->
+    <div class="section-title">Learning Tracks</div>
+    <div class="section-sub">Structured, unlockable lessons — complete one to open the next</div>
+    <div class="track-grid" id="track-grid"></div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     LEARN PAGE
+════════════════════════════════════════════════════════════ -->
+<div id="page-learn" class="page">
+  <div class="learn-layout">
+    <div>
+      <div class="section-title" style="margin-bottom:1rem">Lessons</div>
+      <div class="lesson-list" id="lesson-list"></div>
+    </div>
+    <div>
+      <div class="lesson-content" id="lesson-content">
+        <div style="color:var(--muted);text-align:center;padding:3rem">Select a lesson from the left to begin.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     PRACTICE PAGE
+════════════════════════════════════════════════════════════ -->
+<div id="page-practice" class="page">
+  <div style="margin-bottom:1.5rem">
+    <div class="section-title">Practice Studio</div>
+    <div class="section-sub">Real-time MediaPipe hand detection — skeleton overlay shows landmarks live</div>
+  </div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setPracticeMode('alphabet')">Alphabet</button>
+    <button class="mode-btn" onclick="setPracticeMode('word')">Word Challenge</button>
+    <button class="mode-btn" onclick="setPracticeMode('free')">Free Practice</button>
+  </div>
+
+  <div class="practice-layout">
+    <!-- Camera column -->
+    <div>
+      <div class="camera-box" id="camera-box">
+        <!-- Animation Guide Overlay -->
+        <div id="animation-overlay" class="animation-overlay hidden">
+          <div class="anim-header" id="anim-header">Watch how it's done</div>
+          <div class="anim-content">
+            <video id="anim-video" autoplay loop muted playsinline style="display:none; width: 130px; height: 130px; object-fit: contain; background: var(--surface2); border-radius: var(--r-md); border: 1px solid var(--accent2); padding: 5px;"></video>
+            <img id="anim-img" src="" alt="Sign Guide" class="anim-img">
+            <div id="anim-steps" class="anim-steps"></div>
+          </div>
+          <div class="anim-controls">
+            <button class="btn-primary" onclick="closeAnimation()">Got it, let me try!</button>
+            <button class="btn-secondary" onclick="replayAnimation()">↺ Replay</button>
+          </div>
+        </div>
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="canvas"></canvas>
+        <div class="cam-placeholder" id="cam-placeholder">
+          <div class="big-icon">📷</div>
+          <p>Enable your camera for real-time MediaPipe hand tracking with skeleton overlay</p>
+          <button class="btn-primary" onclick="startCamera()" style="margin-top:8px;font-size:0.85rem;padding:9px 20px">Enable Camera</button>
+        </div>
+        <div class="detection-overlay hidden" id="detection-overlay">
+          <div>
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.55);margin-bottom:2px">Detected</div>
+            <div class="detected-letter" id="detected-letter">—</div>
+          </div>
+          <div class="confidence-badge" id="confidence-badge">—</div>
+        </div>
+      </div>
+
+      <div class="cam-controls">
+        <button class="btn-cam" id="btn-start-cam" onclick="startCamera()">📷 Start Camera</button>
+        <button class="btn-cam hidden" id="btn-stop-cam" onclick="stopCamera()">⏹ Stop</button>
+        <button class="btn-cam" onclick="captureAndAnalyze()">🤖 Analyze Sign</button>
+        <button class="btn-cam" onclick="nextTarget()">→ Next</button>
+      </div>
+
+      <div class="word-challenge hidden" id="word-challenge">
+        <div class="section-heading">Spell the word:</div>
+        <div class="word-display" id="word-display"></div>
+        <div style="color:var(--muted);font-size:0.82rem;margin-top:4px">Sign each letter in sequence</div>
+      </div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="practice-panel">
+      <div class="target-card">
+        <div class="target-label">Target sign</div>
+        <div class="target-letter" id="target-letter">A</div>
+        <img id="target-img" src="" alt="" class="target-img" style="display:none">
+        <div class="target-word" id="target-word">as in Apple</div>
+        <button class="btn-secondary" style="width:100%;margin-top:10px;" onclick="playCurrentAnimation()">👀 Watch Animation Guide</button>
+      </div>
+
+      <div class="session-stats">
+        <div class="mini-stat">
+          <div class="mini-stat-num" id="stat-correct" style="color:var(--accent)">0</div>
+          <div class="mini-stat-label">Correct</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-num" id="stat-wrong" style="color:var(--danger)">0</div>
+          <div class="mini-stat-label">Wrong</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-num" id="stat-streak" style="color:var(--gold)">0</div>
+          <div class="mini-stat-label">Streak</div>
+        </div>
+      </div>
+
+      <div class="feedback-card">
+        <div class="feedback-title">AI Feedback</div>
+        <div id="ai-feedback" style="color:var(--muted);font-size:0.88rem">
+          Click "Analyze Sign" to get instant feedback on your hand position.
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="captureAndAnalyze()" style="width:100%;justify-content:center">
+        🤖 Analyze My Sign
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     PROFILE PAGE
+════════════════════════════════════════════════════════════ -->
+<div id="page-profile" class="page">
+  <div class="profile-header">
+    <div class="avatar">?</div>
+    <div class="profile-info">
+      <h2>Your Profile</h2>
+      <p>Login to see your progress</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
+        <div class="xp-bar"><div class="xp-fill" style="width:0%"></div></div>
+        <span style="font-size:0.75rem;color:var(--muted)">0 / 100 XP to Lv 2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs-section">
+    <button class="tab-btn active" onclick="showProfileTab('achievements')">Achievements</button>
+    <button class="tab-btn" onclick="showProfileTab('history')">History</button>
+    <button class="tab-btn" onclick="showProfileTab('stats')">Stats</button>
+  </div>
+
+  <div id="tab-achievements">
+    <div class="section-heading" style="margin-top:0">Your Badges</div>
+    <div class="achievements" id="achievements-grid"></div>
+  </div>
+
+  <div id="tab-history" class="hidden">
+    <div class="section-heading" style="margin-top:0">Recent Activity</div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+  <div id="tab-stats" class="hidden">
+    <div class="stats-row" style="margin-top:0"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ADMIN PAGE (hidden nav-tab, accessible by URL or admin users)
+════════════════════════════════════════════════════════════ -->
+<div id="page-admin" class="page page-full"></div>
+
+<!-- ════════════════════════════════════════════════════════════
+     AUTH MODAL — Fixed toggle, with Forgot Password
+════════════════════════════════════════════════════════════ -->
+<div id="auth-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="logo">Sign<span>Bridge</span></div>
+      <button class="modal-close" onclick="closeAuthModal()">✕</button>
+    </div>
+
+    <!-- Tab buttons (login / register only) -->
+    <div class="auth-tab-row" id="auth-main-tabs">
+      <button class="auth-tab active" data-tab="login"    onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab"        data-tab="register" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN PANEL -->
+    <div id="auth-panel-login">
+      <div class="form-group">
+        <input id="li-email" class="form-input" type="email" placeholder="Email address" autocomplete="email">
+        <input id="li-pass"  class="form-input" type="password" placeholder="Password" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')doLogin()">
+        <div id="li-err" class="form-err"></div>
+        <button class="btn-submit-login" onclick="doLogin()">Login →</button>
+        <button class="form-link" onclick="showForgotPassword()">Forgot your password?</button>
+      </div>
+    </div>
+
+    <!-- REGISTER PANEL -->
+    <div id="auth-panel-register" style="display:none">
+      <div class="form-group">
+        <input id="rg-name"  class="form-input" type="text"     placeholder="Full name" autocomplete="name">
+        <input id="rg-email" class="form-input" type="email"    placeholder="Email address" autocomplete="email">
+        <input id="rg-pass"  class="form-input" type="password" placeholder="Password (min 6 characters)"
+               autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+        <div id="rg-err" class="form-err"></div>
+        <button class="btn-submit-register" onclick="doRegister()">Create Account →</button>
+      </div>
+    </div>
+
+    <!-- FORGOT PASSWORD PANEL -->
+    <div id="auth-panel-forgot" style="display:none">
+      <div class="form-group">
+        <div style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem">Reset your password</div>
+        <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem">Enter your email address and we'll generate a reset token.</div>
+        <input id="fp-email" class="form-input" type="email" placeholder="Your email address">
+        <div id="fp-msg" class="form-err" style="min-height:auto;line-height:1.5"></div>
+        <button class="btn-submit-reset" onclick="doForgotPassword()">Send Reset Token</button>
+        <button class="form-link" onclick="backToLogin()">← Back to login</button>
+      </div>
+    </div>
+
+    <!-- RESET PASSWORD PANEL -->
+    <div id="auth-panel-reset" style="display:none">
+      <div class="form-group">
+        <div style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem">Set new password</div>
+        <input id="rs-token" class="form-input" type="text"     placeholder="Reset token">
+        <input id="rs-pass"  class="form-input" type="password" placeholder="New password (min 6 chars)"
+               onkeydown="if(event.key==='Enter')doResetPassword()">
+        <div id="rs-msg" class="form-err"></div>
+        <button class="btn-submit-reset" onclick="doResetPassword()">Update Password</button>
+        <button class="form-link" onclick="backToLogin()">← Back to login</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- MediaPipe CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+<!-- App JS -->
+<script src="js/app.js"></script>
+
+</body>
+</html>
