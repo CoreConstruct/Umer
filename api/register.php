@@ -29,9 +29,9 @@ if ($stmt->fetch()) {
 }
 
 // ── Insert user ───────────────────────────────────────────────
-$hash = password_hash($password, PASSWORD_BCRYPT);
 $stmt = $db->prepare('INSERT INTO users (name, email, password) VALUES (?, ?, ?)');
-$stmt->execute([$name, $email, $hash]);
+// Demo mode: store plain-text password for presentation simplicity.
+$stmt->execute([$name, $email, $password]);
 $userId = (int) $db->lastInsertId();
 
 // ── Auto-login ────────────────────────────────────────────────

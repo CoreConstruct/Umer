@@ -165,29 +165,57 @@ nav {
 }
 .alpha-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .alpha-card.mastered { border-color: rgba(110,231,183,0.4); background: rgba(110,231,183,0.05); }
+.alpha-card.completed { border-color: var(--success); background: rgba(52,211,153,0.1); }
+.alpha-card.completed .letter { color: var(--success); }
 .alpha-card .letter    { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; }
 .alpha-card .sign-img  { width: 48px; height: 48px; object-fit: contain; margin: 4px auto 0; display: block; }
 .alpha-card .word-hint { font-size: 0.62rem; color: var(--muted); margin-top: 3px; }
 .alpha-card .check     { position: absolute; top:4px; right:6px; color: var(--accent); font-size:0.7rem; }
 
-/* HOME: Track cards */
-.track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
+/* HOME: Track cards Timeline */
+.track-timeline {
+  display: flex; flex-direction: column; position: relative; gap: 2rem; margin: 2.5rem 0;
+  padding-left: 2rem;
+}
+.track-timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 2px; background: var(--border); border-radius: 2px;
+}
+.timeline-node {
+  position: relative; display: flex; align-items: center; justify-content: flex-start;
+}
+.timeline-dot {
+  position: absolute; left: calc(-2rem + 8px); top: 50%; width: 18px; height: 18px;
+  background: var(--surface); border: 2px solid var(--border); border-radius: 50%;
+  transform: translate(-50%, -50%); z-index: 2; transition: all 0.3s;
+}
+.timeline-node.unlocked .timeline-dot { border-color: var(--accent); background: rgba(110,231,183,0.2); }
+.timeline-node.completed .timeline-dot { border-color: var(--accent); background: var(--accent); }
+
 .track-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
-  padding: 1.25rem; cursor: pointer; transition: all 0.2s; position: relative;
+  padding: 1.5rem; cursor: pointer; transition: all 0.2s; position: relative;
+  display: flex; gap: 1.25rem; align-items: center; width: 100%; max-width: 600px;
 }
-.track-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+.track-card:hover { border-color: var(--accent2); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 .track-card.locked { opacity: 0.55; cursor: not-allowed; }
-.track-icon  { font-size: 1.8rem; margin-bottom: 8px; }
-.track-name  { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
-.track-count { font-size: 0.78rem; color: var(--muted); margin-bottom: 8px; }
-.lock-badge  {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(255,255,255,0.07); border-radius: var(--r-sm);
-  padding: 2px 8px; font-size: 0.7rem; color: var(--muted);
+.track-icon  { 
+  font-size: 2rem; width: 60px; height: 60px; border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center; background: var(--surface2); flex-shrink: 0;
 }
-.progress-bar  { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.5s; }
+.track-info { flex: 1; }
+.track-name  { font-weight: 700; font-size: 1.05rem; margin-bottom: 2px; color: var(--text); }
+.track-count { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+.lock-badge  {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(255,255,255,0.07); border-radius: var(--r-sm);
+  padding: 3px 10px; font-size: 0.75rem; color: var(--muted);
+}
+.progress-bar  { height: 6px; background: var(--border); border-radius: 6px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 6px; background: linear-gradient(90px, var(--accent2), var(--accent)); transition: width 0.5s; }
+
+/* Chart Container */
+.chart-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 1.25rem; position: relative; height: 300px; width: 100%; margin-top: 1.5rem; }
 
 /* ── LEARN ─────────────────────────────────────────────────── */
 .learn-layout { display: grid; grid-template-columns: 270px 1fr; gap: 1.5rem; }

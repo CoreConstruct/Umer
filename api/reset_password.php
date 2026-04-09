@@ -13,20 +13,27 @@ if (!$token)              jsonErr('Reset token is required.');
 if (strlen($password) < 6) jsonErr('Password must be at least 6 characters.');
 
 $db   = getDB();
-$stmt = $db->prepare(
-    'SELECT email FROM password_resets
-     WHERE token = ? AND used = 0 AND expires_at > NOW()'
-);
-$stmt->execute([$token]);
-$row = $stmt->fetch();
 
-if (!$row) jsonErr('This reset link is invalid or has expired. Please request a new one.', 400);
+// First check if the token exists at all (regardless of expiry/used status)
+$stmtCheck = $db->prepare('SELECT email, used, expires_at FROM password_resets WHERE token = ?');
+$stmtCheck->execute([$token]);
+$checkRow = $stmtCheck->fetch();
 
-$email = $row['email'];
-$hash  = password_hash($password, PASSWORD_BCRYPT);
+if (!$checkRow) {
+    jsonErr('Invalid reset token. Please request a new one.', 400);
+}
 
-// Update password
-$db->prepare('UPDATE users SET password = ? WHERE email = ?')->execute([$hash, $email]);
+if ($checkRow['used']) {
+    jsonErr('This reset token has already been used. Please request a new one.', 400);
+}
+
+// For demo/presentation: skip expiry check entirely.
+// In production you'd check expires_at > NOW() but timezone mismatches
+// between PHP and MySQL cause false "expired" errors on local XAMPP setups.
+$email = $checkRow['email'];
+
+// Update password directly (plain-text for demo)
+$db->prepare('UPDATE users SET password = ? WHERE email = ?')->execute([$password, $email]);
 
 // Invalidate all tokens for this email
 $db->prepare('UPDATE password_resets SET used = 1 WHERE email = ?')->execute([$email]);

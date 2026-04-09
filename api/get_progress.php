@@ -20,4 +20,26 @@ foreach ($rows as $r) {
     ];
 }
 
-jsonOk(['progress' => $progress]);
+// Fetch mastered signs: where the user has been correct at least once
+$stmtMastery = $db->prepare("
+    SELECT letter, category 
+    FROM history 
+    WHERE user_id = ? AND is_correct = 1 
+    GROUP BY letter, category 
+    HAVING COUNT(*) >= 1
+");
+$stmtMastery->execute([$userId]);
+$masteryRows = $stmtMastery->fetchAll();
+
+$masteredSigns = [];
+foreach ($masteryRows as $row) {
+    $masteredSigns[] = [
+        'id'       => $row['letter'],
+        'category' => $row['category']
+    ];
+}
+
+jsonOk([
+    'progress'       => $progress,
+    'mastered_signs' => $masteredSigns
+]);

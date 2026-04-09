@@ -21,7 +21,10 @@ $stmt = $db->prepare('SELECT id, name, email, password, xp, level, streak, role 
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 
-if (!$user || !password_verify($password, $user['password'])) {
+$stored = $user['password'] ?? '';
+$passOk = $user && (string)$stored === (string)$password;
+
+if (!$passOk) {
     jsonErr('Invalid email or password.', 401);
 }
 

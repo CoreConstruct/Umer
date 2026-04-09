@@ -67,6 +67,9 @@ $dailySessions = $db->query(
      GROUP BY date ORDER BY date DESC"
 )->fetchAll();
 
+// All users for management table
+$allUsers = $db->query("SELECT id, name, email, xp, level, role, created_at, streak FROM users ORDER BY created_at DESC")->fetchAll();
+
 jsonOk([
     'overview' => [
         'total_users'      => (int) $totalUsers,
@@ -80,4 +83,5 @@ jsonOk([
     'leaderboard'    => $leaderboard,
     'quiz_stats'     => $quizStats,
     'daily_sessions' => $dailySessions,
+    'all_users'      => $allUsers,
 ]);

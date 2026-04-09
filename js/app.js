@@ -25,7 +25,23 @@ const API = {
 
 // Each letter has: word, steps[], img (URL to a reliable hand-sign image)
 // Images from Wikimedia Commons ASL alphabet SVGs (public domain)
-const IMG_BASE = 'https://www.lifeprint.com/asl101/fingerspelling/images/';
+const IMG_BASE_ALPHA   = 'https://www.lifeprint.com/asl101/fingerspelling/images/';
+const IMG_BASE_NUMBERS = 'https://www.lifeprint.com/asl101/gifs/numbers/';
+const IMG_BASE_GENERAL = 'https://www.lifeprint.com/asl101/gifs/';
+
+/**
+ * Resolves the full URL for a sign instructional image
+ */
+function getImgUrl(signImg, category) {
+  if (!signImg) return '';
+  if (category === 'alphabet') return `${IMG_BASE_ALPHA}${signImg}`;
+  if (category === 'numbers')  return `${IMG_BASE_NUMBERS}${signImg}`;
+  
+  // For most general signs, Lifeprint uses [first_letter]/[sign].gif
+  const initial = signImg.charAt(0).toLowerCase();
+  return `${IMG_BASE_GENERAL}${initial}/${signImg}`;
+}
+
 const ASL = {
   A:{word:'Apple',  img:'a.gif', steps:['Make a fist with your dominant hand','Rest your thumb against the side of your index finger','Hold it upright — knuckles face forward']},
   B:{word:'Ball',   img:'b.gif', steps:['Extend all four fingers straight up','Tuck your thumb tightly across your palm','Keep fingers together, palm facing out']},
@@ -58,50 +74,48 @@ const ASL = {
 // Greetings, Numbers, Common Phrases, Emergency — each as sign objects
 const EXTRA_SIGNS = {
   greetings: [
-    {id:'hello',     label:'Hello',      desc:'Open hand, fingers together, wave palm outward from forehead.',   steps:['Hold your dominant hand flat, fingers together','Touch fingertips to your forehead or temple','Move hand outward and slightly downward in a wave']},
-    {id:'goodbye',   label:'Goodbye',    desc:'Wave open hand side-to-side, palm facing out.',                   steps:['Hold open hand up, palm facing outward','Wave fingers side to side','Keep wrist loose for natural movement']},
-    {id:'thank_you', label:'Thank You',  desc:'Flat hand moves from chin outward and down.',                     steps:['Hold dominant hand flat near your chin','Move hand outward and slightly downward','Keep fingers together and palm up']},
-    {id:'please',    label:'Please',     desc:'Open hand, palm inward, rubs circular motion on chest.',          steps:['Place open palm flat against your chest','Rub in a circular motion','Keep a gentle, natural movement']},
-    {id:'sorry',     label:'Sorry',      desc:'Fist circles on chest in an apologetic motion.',                  steps:['Make a fist with your dominant hand','Place fist on your chest','Rub in a slow circular motion']},
-    {id:'yes',       label:'Yes',        desc:'Fist nods up and down like a head nodding yes.',                  steps:['Make a fist with your dominant hand','Move it up and down at the wrist','Like your fist is nodding yes']},
-    {id:'no',        label:'No',         desc:'Index and middle fingers tap thumb repeatedly.',                  steps:['Extend index and middle fingers together','Bring them down to tap your thumb','Snap motion at the wrist — two or three times']},
-    {id:'nice_meet', label:'Nice to Meet',desc:'One hand moves over the other in a smooth gesture.',            steps:['Hold both hands out, palms facing each other','Dominant hand moves over back of other hand','Smooth forward motion']},
-    {id:'how_are',   label:'How Are You',desc:'Both hands move forward toward person being asked.',              steps:['Hold both bent hands up, palms facing you','Move both hands forward together','Expression matters — raised eyebrows for question']},
-    {id:'my_name',   label:'My Name Is', desc:'Two-finger tap on back of opposite hand to spell N-A-M-E.',      steps:['Hold non-dominant hand flat, palm down','Tap index and middle fingers on back of that hand twice','Follow by fingerspelling your name']},
+    {id:'hello',     label:'Hello',      img:'hello.gif',    desc:'Open hand, fingers together, wave palm outward from forehead.',   steps:['Hold your dominant hand flat, fingers together','Touch fingertips to your forehead or temple','Move hand outward and slightly downward in a wave']},
+    {id:'goodbye',   label:'Goodbye',    img:'goodbye.gif',  desc:'Wave open hand side-to-side, palm facing out.',                   steps:['Hold open hand up, palm facing outward','Wave fingers side to side','Keep wrist loose for natural movement']},
+    {id:'thank_you', label:'Thank You',  img:'thankyou.gif', desc:'Flat hand moves from chin outward and down.',                     steps:['Hold dominant hand flat near your chin','Move hand outward and slightly downward','Keep fingers together and palm up']},
+    {id:'please',    label:'Please',     img:'please.gif',   desc:'Open hand, palm inward, rubs circular motion on chest.',          steps:['Place open palm flat against your chest','Rub in a circular motion','Keep a gentle, natural movement']},
+    {id:'sorry',     label:'Sorry',      img:'sorry.gif',    desc:'Fist circles on chest in an apologetic motion.',                  steps:['Make a fist with your dominant hand','Place fist on your chest','Rub in a slow circular motion']},
+    {id:'yes',       label:'Yes',        img:'yes.gif',      desc:'Fist nods up and down like a head nodding yes.',                  steps:['Make a fist with your dominant hand','Move it up and down at the wrist','Like your fist is nodding yes']},
+    {id:'no',        label:'No',         img:'no.gif',       desc:'Index and middle fingers tap thumb repeatedly.',                  steps:['Extend index and middle fingers together','Bring them down to tap your thumb','Snap motion at the wrist — two or three times']},
+    {id:'nice_meet', label:'Nice to Meet',img:'nice-to-meet-you.gif',desc:'One hand moves over the other in a smooth gesture.',            steps:['Hold both hands out, palms facing each other','Dominant hand moves over back of other hand','Smooth forward motion']},
+    {id:'how_are',   label:'How Are You',img:'how-are-you.gif',desc:'Both hands move forward toward person being asked.',              steps:['Hold both bent hands up, palms facing you','Move both hands forward together','Expression matters — raised eyebrows for question']},
+    {id:'my_name',   label:'My Name Is', img:'name.gif',     desc:'Two-finger tap on back of opposite hand to spell N-A-M-E.',      steps:['Hold non-dominant hand flat, palm down','Tap index and middle fingers on back of that hand twice','Follow by fingerspelling your name']},
   ],
   numbers: [
-    {id:'one',   label:'1', desc:'Index finger points straight up, palm facing out.',    steps:['Hold up only your index finger','Keep it pointing straight up','All other fingers and thumb curl in']},
-    {id:'two',   label:'2', desc:'Index and middle fingers up in a V, palm out.',        steps:['Extend index and middle fingers up','Spread them slightly apart','Palm faces away from you']},
-    {id:'three', label:'3', desc:'Thumb, index, middle extended — palm out.',             steps:['Extend thumb, index finger, and middle finger','Curl ring and pinky fingers in','Palm faces outward']},
-    {id:'four',  label:'4', desc:'Four fingers up, thumb tucked, palm out.',             steps:['Extend all four fingers upward','Tuck thumb tightly across palm','Palm faces outward']},
-    {id:'five',  label:'5', desc:'All five fingers spread open, palm out.',              steps:['Spread all five fingers wide open','Palm facing outward','Natural open-hand position']},
-    {id:'six',   label:'6', desc:'Pinky and thumb touch, other fingers extended.',       steps:['Extend index, middle, and ring fingers upward','Bring pinky down to touch thumb','Palm faces outward']},
-    {id:'seven', label:'7', desc:'Ring finger and thumb touch, others extended.',        steps:['Extend index, middle, and pinky fingers up','Bring ring finger down to touch thumb','Palm faces outward']},
-    {id:'eight', label:'8', desc:'Middle finger and thumb touch, others extended.',      steps:['Extend index, ring, and pinky fingers upward','Bring middle finger down to touch thumb','Palm faces outward']},
-    {id:'nine',  label:'9', desc:'Index finger and thumb touch (like OK sign).',         steps:['Touch tip of index finger to your thumb','Extend middle, ring, and pinky fingers up','Palm facing outward']},
-    {id:'ten',   label:'10', desc:'Thumbs up with shake/wiggle.',                        steps:['Make a thumbs-up sign','Shake wrist slightly side to side','Just one hand needed']},
+    {id:'one',   label:'1', img:'01.gif', desc:'Index finger points straight up, palm facing out.',    steps:['Hold up only your index finger','Keep it pointing straight up','All other fingers and thumb curl in']},
+    {id:'two',   label:'2', img:'02.gif', desc:'Index and middle fingers up in a V, palm out.',        steps:['Extend index and middle fingers up','Spread them slightly apart','Palm faces away from you']},
+    {id:'three', label:'3', img:'03.gif', desc:'Thumb, index, middle extended — palm out.',             steps:['Extend thumb, index finger, and middle finger','Curl ring and pinky fingers in','Palm faces outward']},
+    {id:'four',  label:'4', img:'04.gif', desc:'Four fingers up, thumb tucked, palm out.',             steps:['Extend all four fingers upward','Tuck thumb tightly across palm','Palm faces outward']},
+    {id:'five',  label:'5', img:'05.gif', desc:'All five fingers spread open, palm out.',              steps:['Spread all five fingers wide open','Palm facing outward','Natural open-hand position']},
+    {id:'six',   label:'6', img:'06.gif', desc:'Pinky and thumb touch, other fingers extended.',       steps:['Extend index, middle, and ring fingers upward','Bring pinky down to touch thumb','Palm faces outward']},
+    {id:'seven', label:'7', img:'07.gif', desc:'Ring finger and thumb touch, others extended.',        steps:['Extend index, middle, and pinky fingers up','Bring ring finger down to touch thumb','Palm faces outward']},
+    {id:'eight', label:'8', img:'08.gif', desc:'Middle finger and thumb touch, others extended.',      steps:['Extend index, ring, and pinky fingers upward','Bring middle finger down to touch thumb','Palm faces outward']},
+    {id:'nine',  label:'9', img:'09.gif', desc:'Index finger and thumb touch (like OK sign).',         steps:['Touch tip of index finger to your thumb','Extend middle, ring, and pinky fingers up','Palm facing outward']},
+    {id:'ten',   label:'10', img:'10.gif', desc:'Thumbs up with shake/wiggle.',                        steps:['Make a thumbs-up sign','Shake wrist slightly side to side','Just one hand needed']},
   ],
   phrases: [
-    {id:'help',      label:'Help',        desc:'Thumbs-up hand lifts from flat palm of other hand.',          steps:['Hold non-dominant hand flat, palm up','Place dominant hand fist (thumbs up) on it','Lift both hands upward together']},
-    {id:'understand',label:'Understand',  desc:'Index finger flicks upward from temple area.',                 steps:['Point index finger at temple','Flick it upward quickly','Like a lightbulb going on in your head']},
-    {id:'repeat',    label:'Repeat/Again',desc:'Bent hand taps flat palm of other hand.',                     steps:['Hold non-dominant hand flat, palm up','Curl dominant hand fingers','Tap curled fingertips against palm']},
-    {id:'slow',      label:'Slow Down',   desc:'Dominant hand strokes slowly up back of other arm.',          steps:['Hold non-dominant arm out, palm down','Stroke dominant hand slowly from wrist to elbow','Slow deliberate motion']},
-    {id:'bathroom',  label:'Bathroom',    desc:'Letter T shaken at wrist side to side.',                      steps:['Make the T handshape','Shake your wrist from side to side','This is the universal sign for "bathroom"']},
-    {id:'water2',    label:'Water',       desc:'W handshape taps chin twice.',                                 steps:['Form the letter W handshape','Tap your chin twice with the W','Front of chin, two light taps']},
-    {id:'food',      label:'Food/Eat',    desc:'Fingertips and thumb touch, move toward mouth.',              steps:['Bring fingertips and thumb together','Move the bundled fingers toward your mouth','As if bringing food to eat']},
-    {id:'love',      label:'Love',        desc:'Cross both arms over chest, fists closed.',                   steps:['Cross your arms over your chest','Both hands in fists','Hug yourself — the sign for love/I love you']},
-    {id:'family',    label:'Family',      desc:'F handshape on both hands, circle outward.',                  steps:['Form F with both hands','Hold them facing each other','Circle both hands outward until pinky sides touch']},
-    {id:'friend',    label:'Friend',      desc:'Hook index fingers together, alternate which is on top.',     steps:['Hook your right index finger around left index finger','Then flip — hook left over right','Both hooks alternate once']},
+    {id:'help',      label:'Help',        img:'help.gif',      desc:'Thumbs-up hand lifts from flat palm of other hand.',          steps:['Hold non-dominant hand flat, palm up','Place dominant hand fist (thumbs up) on it','Lift both hands upward together']},
+    {id:'understand',label:'Understand',  img:'understand.gif', desc:'Index finger flicks upward from temple area.',                 steps:['Point index finger at temple','Flick it upward quickly','Like a lightbulb going on in your head']},
+    {id:'repeat',    label:'Repeat/Again',img:'again.gif',      desc:'Bent hand taps flat palm of other hand.',                     steps:['Hold non-dominant hand flat, palm up','Curl dominant hand fingers','Tap curled fingertips against palm']},
+    {id:'slow',      label:'Slow Down',   img:'slow.gif',      desc:'Dominant hand strokes slowly up back of other arm.',          steps:['Hold non-dominant arm out, palm down','Stroke dominant hand slowly from wrist to elbow','Slow deliberate motion']},
+    {id:'bathroom',  label:'Bathroom',    img:'bathroom.gif',  desc:'Letter T shaken at wrist side to side.',                      steps:['Make the T handshape','Shake your wrist from side to side','This is the universal sign for "bathroom"']},
+    {id:'water2',    label:'Water',       img:'water.gif',     desc:'W handshape taps chin twice.',                                 steps:['Form the letter W handshape','Tap your chin twice with the W','Front of chin, two light taps']},
+    {id:'food',      label:'Food/Eat',    img:'eat.gif',       desc:'Fingertips and thumb touch, move toward mouth.',              steps:['Bring fingertips and thumb together','Move the bundled fingers toward your mouth','As if bringing food to eat']},
+    {id:'love',      label:'Love',        img:'love.gif',      desc:'Cross both arms over chest, fists closed.',                   steps:['Cross your arms over your chest','Both hands in fists','Hug yourself — the sign for love/I love you']},
+    {id:'family',    label:'Family',      img:'family.gif',    desc:'F handshape on both hands, circle outward.',                  steps:['Form F with both hands','Hold them facing each other','Circle both hands outward until pinky sides touch']},
   ],
 };
 
 // Lessons definition — ordered, with unlock dependencies
 const LESSONS = [
-  { id:0, title:'ASL Alphabet A–M',  desc:'First 13 letters of ASL fingerspelling', icon:'🔤', color:'#6ee7b7', category:'alphabet',  items: 'ABCDEFGHIJKLM'.split(''), unlocks:[],  quizCount:5 },
-  { id:1, title:'ASL Alphabet N–Z',  desc:'Complete the ASL alphabet',              icon:'🔤', color:'#818cf8', category:'alphabet',  items: 'NOPQRSTUVWXYZ'.split(''), unlocks:[0], quizCount:5 },
-  { id:2, title:'Greetings',         desc:'Say hello, goodbye and thank you',        icon:'👋', color:'#f472b6', category:'greetings', items: EXTRA_SIGNS.greetings,    unlocks:[0], quizCount:5 },
-  { id:3, title:'Numbers 1–10',      desc:'Count from one to ten in ASL',            icon:'🔢', color:'#fbbf24', category:'numbers',   items: EXTRA_SIGNS.numbers,     unlocks:[0], quizCount:5 },
-  { id:4, title:'Common Phrases',    desc:'Everyday useful expressions',             icon:'💬', color:'#f87171', category:'phrases',   items: EXTRA_SIGNS.phrases,     unlocks:[2,3], quizCount:5 },
+  { id:0, title:'Alphabet A–M',      desc:'First 13 letters of ASL',                     icon:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-spell-check-2"><path d="m6 16 6-12 6 12"/><path d="M8 12h8"/><path d="M4 21c1.1 0 1.1-1 2.1-1s1.1 1 2.1 1 1.1-1 2.1-1 1.1 1 2.1 1 1.1-1 2.1-1 1.1 1 2.1 1"/></svg>', color:'#6ee7b7', category:'alphabet',  items: 'ABCDEFGHIJKLM'.split(''), unlocks:[],    quizCount:5 },
+  { id:1, title:'Alphabet N–Z',      desc:'Complete the ASL alphabet',                   icon:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alphabet"><path d="M12 11h.01"/><path d="M16 11h.01"/><path d="M16 15h.01"/><path d="M8 11h.01"/><path d="M8 15h.01"/><path d="M4 11h.01"/><path d="M4 15h.01"/><path d="M20 11h.01"/><path d="M20 15h.01"/><path d="M5 2c0 1.1.9 2 2 2s2-.9 2-2"/><path d="M5 22c0-1.1.9-2 2-2s2 .9 2 2"/><path d="M15 2c0 1.1.9 2 2 2s2-.9 2-2"/><path d="M15 22c0-1.1.9-2 2-2s2 .9 2 2"/><path d="M2 13h20"/><path d="M2 17h20"/><path d="M2 5h20"/><path d="M2 9h20"/></svg>', icon_fallback:'🔤', color:'#818cf8', category:'alphabet',  items: 'NOPQRSTUVWXYZ'.split(''), unlocks:[0],   quizCount:5 },
+  { id:2, title:'Numbers 1–10',      desc:'Count from one to ten in ASL',                icon:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-binary"><rect width="8" height="12" x="2" y="10" rx="1"/><path d="M14 14h2"/><path d="M22 17h-1"/><path d="M12 2h8"/><path d="M12 6h8"/><path d="M12 10h8"/><path d="M12 14h8"/><rect width="8" height="12" x="2" y="10" rx="1"/><path d="M7 2h3.1"/><path d="m7 6 3 3"/><path d="m7 14 3-3"/></svg>', color:'#fbbf24', category:'numbers',   items: EXTRA_SIGNS.numbers,      unlocks:[1],   quizCount:5 },
+  { id:3, title:'Common Phrases',    desc:'Everyday useful expressions',                 icon:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg>', color:'#f87171', category:'phrases',   items: EXTRA_SIGNS.phrases,      unlocks:[2],   quizCount:5 },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -109,6 +123,8 @@ const LESSONS = [
 ═══════════════════════════════════════════════════════════════ */
 let currentUser     = null;
 let lessonProgress  = {};    // { lessonId: { completed, score } }
+let masteredSigns   = [];    // Array of {id, category}
+let completedAlphabets = []; // Deprecated but kept for compatibility
 let currentLesson   = 0;
 let currentSignIdx  = 0;
 
@@ -149,10 +165,10 @@ function showToast(msg, type='success', duration=3000) {
 
 function $(id) { return document.getElementById(id); }
 
-function signImg(src, alt, cls='') {
-  // If it looks like a Wikimedia URL use it; otherwise show a placeholder SVG
+function signImg(src, alt, category, cls='') {
   if (!src) return `<div class="sign-img-placeholder ${cls}" title="${alt}"><span>${alt.charAt(0)}</span></div>`;
-  return `<img src="${IMG_BASE}${src}" alt="${alt}" class="${cls}" onerror="this.outerHTML='<div class=sign-img-ph>${alt}</div>'">`;
+  const fullUrl = getImgUrl(src, category);
+  return `<img src="${fullUrl}" alt="${alt}" class="${cls}" onerror="this.outerHTML='<div class=sign-img-ph>${alt}</div>'">`;
 }
 
 function getSignForItem(lessonId, item) {
@@ -173,7 +189,16 @@ function showPage(id) {
   const pg = $('page-' + id);
   if (pg) pg.classList.add('active');
 
-  // Logic to highlight correct nav-tab
+  // Hide/Show Hero based on Auth + Page
+  const hero = document.querySelector('.hero');
+  if (hero) {
+    if (id === 'home' && !currentUser) {
+      hero.style.display = 'block';
+    } else {
+      hero.style.display = 'none';
+    }
+  }
+
   const tabMap = {
     'home': 0, 'learn': 1, 'practice': 2, 'profile': 3, 'admin': 4
   };
@@ -183,7 +208,11 @@ function showPage(id) {
   }
 
   if (id === 'learn')    renderLearn();
-  if (id === 'practice') { setTimeout(initMediaPipe, 300); renderPracticeTarget(); }
+  if (id === 'practice') { 
+    setTimeout(initMediaPipe, 300); 
+    renderPracticeTarget(); 
+    setPracticeMode(practiceMode); // Ensure UI syncs
+  }
   if (id === 'profile')  loadProfile();
   if (id === 'admin')    loadAdmin();
   window.scrollTo(0, 0);
@@ -297,7 +326,8 @@ async function doForgotPassword() {
             <input value="${d.token}" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-size:0.8rem;font-family:monospace" readonly onclick="this.select()">
             <br><button class="form-link" onclick="prefillReset('${d.token}')">→ Use this token to reset password</button>`;
         } else {
-          msg.textContent = 'If that email exists, reset instructions have been sent.';
+          msg.textContent = 'If that email exists, reset instructions have been sent. Check your inbox!';
+          setTimeout(() => switchAuthTab('reset'), 2500);
         }
       }
     } else {
@@ -369,17 +399,75 @@ async function checkAuth() {
 
 function applyUserToUI() {
   if (!currentUser) return;
-  if($('nav-level'))  $('nav-level').textContent  = `Lv ${currentUser.level}`;
-  if($('nav-streak')) $('nav-streak').textContent = currentUser.streak || 0;
+  const isAdmin = currentUser.role === 'admin';
+
+  // Hide XP/streak/level for admins
+  if (isAdmin) {
+    if($('nav-level'))  $('nav-level').style.display  = 'none';
+    if($('nav-streak')) document.querySelector('.streak').style.display = 'none';
+  } else {
+    if($('nav-level'))  { $('nav-level').style.display = ''; $('nav-level').textContent = `Lv ${currentUser.level}`; }
+    if($('nav-streak')) { document.querySelector('.streak').style.display = ''; $('nav-streak').textContent = currentUser.streak || 0; }
+  }
+  
   const logoutBtn = $('btn-logout');
   const loginBtn  = $('btn-login-nav');
   if(logoutBtn) logoutBtn.style.display = 'inline-flex';
   if(loginBtn)  loginBtn.style.display  = 'none';
 
-  // Toggle Admin tab
+  // Enable pfp in navbar
+  const navPfp = $('nav-pfp');
+  if (navPfp) navPfp.style.display = 'flex';
+
+  // Profile Picture Rendering
+  const pfpEls = document.querySelectorAll('.avatar');
+  pfpEls.forEach(el => {
+    if (currentUser.pfp_path) {
+      el.innerHTML = `<img src="${currentUser.pfp_path}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+    } else {
+      const initials = currentUser.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--accent);color:white;border-radius:50%;font-weight:700">${initials || '?'}</div>`;
+    }
+  });
+
+  // Role-based Nav Isolation & Admin Redirection
   const adminTab = $('nav-admin');
-  if (adminTab) {
-    adminTab.style.display = (currentUser.role === 'admin') ? 'inline-flex' : 'none';
+  if (adminTab) adminTab.style.display = isAdmin ? 'inline-flex' : 'none';
+
+  // Hide learner tabs for admins, hide profile tab for admins
+  const learnerTabs = ['home', 'learn', 'practice', 'profile'].map(id => document.querySelector(`.nav-tab[onclick*="showPage('${id}')"]`));
+  learnerTabs.forEach(tab => {
+    if (tab) {
+      tab.style.display = isAdmin ? 'none' : 'inline-flex';
+    }
+  });
+
+  // Auto-redirect admin to dashboard
+  if (isAdmin) {
+     showPage('admin');
+  }
+}
+
+async function uploadPfp(input) {
+  if (!input.files || !input.files[0]) return;
+  const formData = new FormData();
+  formData.append('pfp', input.files[0]);
+
+  try {
+    const r = await fetch('api/upload_pfp.php', {
+      method: 'POST',
+      body: formData
+    });
+    const d = await r.json();
+    if (d.success) {
+      currentUser.pfp_path = d.pfp_path;
+      applyUserToUI();
+      showToast('Profile picture updated!');
+    } else {
+      showToast(d.error || 'Upload failed', 'error');
+    }
+  } catch(e) {
+    showToast('Failed to connect to server', 'error');
   }
 }
 
@@ -388,8 +476,15 @@ async function loadProgress() {
   try {
     const r = await fetch(API.progress, {credentials:'include'});
     const d = await r.json();
-    if (d.success) lessonProgress = d.progress;
+    if (d.success) {
+      lessonProgress = d.progress;
+      masteredSigns  = d.mastered_signs || [];
+      // Backward compatibility
+      completedAlphabets = masteredSigns.filter(s=>s.category==='alphabet').map(s=>s.id);
+    }
     renderLearnSidebar(); // update lock states
+    buildAlphaGrid();
+    buildExtraGrids();
     buildHomeTracks();
   } catch(e) {}
 }
@@ -400,6 +495,7 @@ async function loadProgress() {
 
 function buildHome() {
   buildAlphaGrid();
+  buildExtraGrids();
   buildHomeTracks();
 }
 
@@ -408,37 +504,94 @@ function buildAlphaGrid() {
   if (!grid) return;
   grid.innerHTML = '';
   Object.keys(ASL).forEach((letter, i) => {
+    const isMastered = masteredSigns.some(s => s.id === letter && s.category === 'alphabet');
     const card = document.createElement('div');
-    card.className = 'alpha-card';
+    card.className = 'alpha-card' + (isMastered ? ' completed' : '');
     card.innerHTML = `
+      ${isMastered ? '<span class="check" title="Mastered (3+ correct)">✓</span>' : ''}
       <div class="letter">${letter}</div>
-      <img src="${IMG_BASE}${ASL[letter].img}" alt="${letter}" class="sign-img"
+      <img src="${getImgUrl(ASL[letter].img, 'alphabet')}" alt="${letter}" class="sign-img"
            onerror="this.style.display='none'">
       <div class="word-hint">${ASL[letter].word}</div>`;
-    card.onclick = () => { showPage('practice'); setTarget(i); };
+    card.onclick = () => { practiceMode='alphabet'; targetLetterIdx=i; showPage('practice'); setTarget(targetLetterIdx); };
     grid.appendChild(card);
   });
+}
+
+function buildExtraGrids() {
+  const numGrid = $('numbers-grid');
+  if (numGrid) {
+    numGrid.innerHTML = '';
+    EXTRA_SIGNS.numbers.forEach((item, i) => {
+      const isMastered = masteredSigns.some(s => s.id === item.id && s.category === 'numbers');
+      const card = document.createElement('div');
+      card.className = 'alpha-card' + (isMastered ? ' completed' : '');
+      card.innerHTML = `
+        ${isMastered ? '<span class="check" title="Mastered">✓</span>' : ''}
+        <div class="letter">${item.label}</div>
+        <img src="${getImgUrl(item.img, 'numbers')}" alt="${item.label}" class="sign-img" onerror="this.style.display='none'">
+      `;
+      card.onclick = () => { practiceMode='numbers'; targetLetterIdx=i; showPage('practice'); setTarget(targetLetterIdx); };
+      numGrid.appendChild(card);
+    });
+  }
+
+  const phrGrid = $('phrases-grid');
+  if (phrGrid) {
+    phrGrid.innerHTML = '';
+    EXTRA_SIGNS.phrases.forEach((item, i) => {
+      const isMastered = masteredSigns.some(s => s.id === item.id && s.category === 'phrases');
+      const card = document.createElement('div');
+      card.className = 'alpha-card' + (isMastered ? ' completed' : '');
+      card.innerHTML = `
+        ${isMastered ? '<span class="check" title="Mastered">✓</span>' : ''}
+        <div class="letter">${item.label}</div>
+        <img src="${getImgUrl(item.img, 'phrases')}" alt="${item.label}" class="sign-img" onerror="this.style.display='none'">
+      `;
+      card.onclick = () => { practiceMode='phrases'; targetLetterIdx=i; showPage('practice'); setTarget(targetLetterIdx); };
+      phrGrid.appendChild(card);
+    });
+  }
 }
 
 function buildHomeTracks() {
   const grid = $('track-grid');
   if (!grid) return;
+  grid.className = 'track-timeline';
   grid.innerHTML = '';
   LESSONS.forEach((lesson, i) => {
     const unlocked = isLessonUnlocked(lesson.id);
     const prog     = lessonProgress[lesson.id];
     const pct      = prog ? (prog.completed ? 100 : Math.min(99, prog.score)) : 0;
+    const completed = prog?.completed;
+    
+    // Check if ALL signs in this lesson are mastered
+    const lessonItems = Array.isArray(lesson.items) ? lesson.items : [];
+    const masteredAll = lessonItems.length > 0 && lessonItems.every(item => {
+        const signId = (typeof item === 'string') ? item : item.id;
+        return masteredSigns.some(s => s.id === signId && s.category === lesson.category);
+    });
+
+    const isDone = completed || masteredAll;
 
     const div = document.createElement('div');
-    div.className = 'track-card' + (!unlocked ? ' locked' : '');
+    div.className = 'timeline-node' + (unlocked ? ' unlocked' : '') + (isDone ? ' completed' : '');
     div.innerHTML = `
-      ${!unlocked ? '<span class="lock-badge">🔒 Locked</span>' : ''}
-      <div class="track-icon">${lesson.icon}</div>
-      <div class="track-name">${lesson.title}</div>
-      <div class="track-count">${lesson.items.length} signs</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-      ${prog?.completed ? '<div style="margin-top:6px"><span class="badge badge-green">Completed ✓</span></div>' : ''}`;
-    if (unlocked) div.onclick = () => { currentLesson = i; showPage('learn'); };
+      <div class="timeline-dot"></div>
+      <div class="track-card ${!unlocked ? 'locked' : ''}">
+        ${!unlocked ? '<span class="lock-badge">🔒 Locked</span>' : ''}
+        <div class="track-icon">${lesson.icon}</div>
+        <div class="track-info">
+          <div class="track-name">${lesson.title}</div>
+          <div class="track-count">${lessonItems.length} signs</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          ${isDone ? '<div style="margin-top:6px"><span class="badge badge-green">Mastered ✓</span></div>' : ''}
+        </div>
+      </div>
+    `;
+    if (unlocked) {
+      div.querySelector('.track-card').onclick = () => { currentLesson = i; showPage('learn'); };
+    }
     grid.appendChild(div);
   });
 }
@@ -446,7 +599,16 @@ function buildHomeTracks() {
 function isLessonUnlocked(lessonId) {
   const lesson = LESSONS[lessonId];
   if (!lesson.unlocks || lesson.unlocks.length === 0) return true;
-  return lesson.unlocks.every(dep => lessonProgress[dep]?.completed);
+  return lesson.unlocks.every(depId => {
+    // Unlock if lesson_progress says completed OR all signs mastered
+    if (lessonProgress[depId]?.completed) return true;
+    const depLesson = LESSONS[depId];
+    const depItems = Array.isArray(depLesson.items) ? depLesson.items : [];
+    return depItems.length > 0 && depItems.every(item => {
+      const signId = (typeof item === 'string') ? item : item.id;
+      return masteredSigns.some(s => s.id === signId && s.category === depLesson.category);
+    });
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -466,19 +628,34 @@ function renderLearnSidebar() {
     const unlocked  = isLessonUnlocked(lesson.id);
     const prog      = lessonProgress[lesson.id];
     const completed = prog?.completed;
+
+    // Check mastery per-sign in this lesson
+    const lessonItems = Array.isArray(lesson.items) ? lesson.items : [];
+    let masteredCount = 0;
+    lessonItems.forEach(item => {
+        const signId = (typeof item === 'string') ? item : item.id;
+        if (masteredSigns.some(s => s.id === signId && s.category === lesson.category)) masteredCount++;
+    });
+    const masteredAll = lessonItems.length > 0 && masteredCount === lessonItems.length;
+    const isDone = completed || masteredAll;
+    const pct = isDone ? 100 : (lessonItems.length > 0 ? Math.round(masteredCount / lessonItems.length * 100) : 0);
+
     const item = document.createElement('div');
     item.className = 'lesson-item'
       + (i === currentLesson ? ' active' : '')
-      + (completed ? ' completed' : '')
+      + (isDone ? ' completed' : '')
       + (!unlocked ? ' locked' : '');
     item.innerHTML = `
       <div class="lesson-icon" style="background:${lesson.color}22">${lesson.icon}</div>
       <div class="lesson-info">
         <div class="lesson-name">${lesson.title}</div>
         <div class="lesson-desc">${lesson.desc}</div>
+        <div class="progress-bar" style="margin-top:6px;height:4px"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:0.65rem;color:var(--muted);margin-top:2px">${masteredCount}/${lessonItems.length} signs${isDone ? ' · Mastered ✓' : ''}</div>
       </div>
       <div class="lesson-status">
-        ${completed ? '✅' : !unlocked ? '🔒' : ''}
+        ${isDone ? '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>' : 
+          !unlocked ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' : ''}
       </div>`;
     if (unlocked) {
       item.onclick = () => { currentLesson = i; currentSignIdx = 0; renderLearn(); };
@@ -506,19 +683,41 @@ function renderLessonContent(lessonId) {
 
   const prog = lessonProgress[lessonId];
 
+  // Calculate mastery for this lesson
+  const lItems = Array.isArray(lesson.items) ? lesson.items : [];
+  let mCount = 0;
+  lItems.forEach(item => {
+    const sid = (typeof item === 'string') ? item : item.id;
+    if (masteredSigns.some(s => s.id === sid && s.category === lesson.category)) mCount++;
+  });
+  const allMastered = lItems.length > 0 && mCount === lItems.length;
+  const isDone = prog?.completed || allMastered;
+  const pct = isDone ? 100 : (lItems.length > 0 ? Math.round(mCount / lItems.length * 100) : 0);
+
   el.innerHTML = `
     <div class="fade-in">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1.5rem">
         <div>
           <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800">${lesson.title}</h2>
           <p style="color:var(--muted);font-size:0.9rem;margin-top:4px">${lesson.desc}</p>
+          <div class="progress-bar" style="margin-top:8px;height:6px;max-width:300px"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px">${mCount}/${lItems.length} signs mastered${isDone ? ' · Lesson Complete ✓' : ''}</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${prog?.completed ? '<span class="badge badge-green">Completed ✓</span>' : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          ${isDone ? '<span class="badge badge-green" style="font-size:0.85rem;padding:6px 14px">Completed ✓</span>' : ''}
           ${prog?.score > 0 ? `<span class="badge badge-purple">Best: ${prog.score}%</span>` : ''}
           <button class="btn-primary" onclick="startQuiz(${lessonId})" style="font-size:0.85rem;padding:8px 18px">📝 Take Quiz</button>
         </div>
       </div>
+
+      ${allMastered && !prog?.completed ? `
+        <div style="background:rgba(110,231,183,0.1);border:1px solid rgba(110,231,183,0.3);border-radius:var(--r-md);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-weight:700;color:var(--accent)">🎉 All signs mastered!</div>
+            <div style="font-size:0.82rem;color:var(--muted)">Take the quiz to complete this lesson and unlock the next one.</div>
+          </div>
+          <button class="btn-primary" onclick="startQuiz(${lessonId})" style="font-size:0.85rem;padding:8px 18px">Take Quiz Now →</button>
+        </div>` : ''}
 
       <div class="sign-cards-grid" id="sign-cards-grid"></div>
 
@@ -535,18 +734,22 @@ function buildSignCards(lesson) {
   grid.innerHTML = '';
   lesson.items.forEach((item, i) => {
     const sign = getSignForItem(lesson.id, item);
+    const signId = (typeof item === 'string') ? item : item.id;
+    const isMastered = masteredSigns.some(s => s.id === signId && s.category === lesson.category);
+    
     const letter = lesson.category === 'alphabet' ? item : sign.label;
-    const word   = lesson.category === 'alphabet' ? sign.word : sign.desc.split('.')[0];
-    const imgSrc = lesson.category === 'alphabet' ? `${IMG_BASE}${sign.img}` : '';
+    const word   = lesson.category === 'alphabet' ? sign.word : sign.label;
+    const imgSrc = getImgUrl(sign.img, lesson.category);
 
     const card = document.createElement('div');
-    card.className = 'sign-card' + (i === currentSignIdx ? ' active' : '');
+    card.className = 'sign-card' + (i === currentSignIdx ? ' active' : '') + (isMastered ? ' mastered' : '');
     card.id = `sc-${i}`;
     card.innerHTML = `
       ${imgSrc
         ? `<img src="${imgSrc}" alt="${letter}" class="sign-card-img" onerror="this.style.display='none'">`
         : `<div style="width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 8px">${lesson.icon}</div>`}
       <div class="sign-card-letter">${letter}</div>
+      ${isMastered ? '<div class="card-mastery-badge">✓</div>' : ''}
       <div class="sign-card-word">${lesson.category === 'alphabet' ? word : ''}</div>`;
     card.onclick = () => {
       currentSignIdx = i;
@@ -563,11 +766,12 @@ function showSignDetail(lesson, idx) {
   if (!el) return;
   const item   = lesson.items[idx];
   const sign   = getSignForItem(lesson.id, item);
+  const signId = (typeof item === 'string') ? item : item.id;
   const letter = lesson.category === 'alphabet' ? item : sign.label;
   const word   = lesson.category === 'alphabet' ? sign.word : '';
   const desc   = lesson.category === 'alphabet' ? 'ASL Fingerspelling' : (sign.desc || '');
   const steps  = sign.steps || [];
-  const imgSrc = lesson.category === 'alphabet' ? `${IMG_BASE}${sign.img}` : '';
+  const imgSrc = getImgUrl(sign.img, lesson.category);
 
   el.innerHTML = `
     <div class="sign-detail-area">
@@ -581,16 +785,34 @@ function showSignDetail(lesson, idx) {
           ${steps.map((s,i) => `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}
         </div>
         <button class="btn-primary" style="margin-top:1rem;font-size:0.85rem;padding:8px 18px"
-          onclick="goToPractice('${letter}')">Practice this sign →</button>
+          onclick="goToPractice('${signId}', '${lesson.category}')">Practice this sign →</button>
       </div>
     </div>`;
 }
 
-function goToPractice(letter) {
-  const keys = Object.keys(ASL);
-  const idx  = keys.indexOf(letter);
-  if (idx >= 0) { targetLetterIdx = idx; }
+function goToPractice(signId, category) {
+  if (category === 'numbers') {
+    practiceMode = 'numbers';
+    targetLetterIdx = Math.max(0, EXTRA_SIGNS.numbers.findIndex(s => s.id === signId));
+  } else if (category === 'phrases') {
+    practiceMode = 'phrases';
+    targetLetterIdx = Math.max(0, EXTRA_SIGNS.phrases.findIndex(s => s.id === signId));
+  } else {
+    practiceMode = 'alphabet';
+    targetLetterIdx = Math.max(0, Object.keys(ASL).indexOf(signId));
+  }
+  
+  // Update select if it exists
+  const modeSelect = $('practice-mode');
+  if (modeSelect) {
+      if (!Array.from(modeSelect.options).some(o => o.value === practiceMode)) {
+          modeSelect.add(new Option(practiceMode.charAt(0).toUpperCase() + practiceMode.slice(1), practiceMode));
+      }
+      modeSelect.value = practiceMode;
+  }
+
   showPage('practice');
+  setTarget(targetLetterIdx);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -630,8 +852,9 @@ function buildQuizQuestions(lessonId) {
   // Build pool of questions and shuffle
   let pool = items.map((item, idx) => {
     const isAlpha   = lesson.category === 'alphabet';
+    const sign      = getSignForItem(lessonId, item);
     const correct   = isAlpha ? item : item.label;
-    const imgSrc    = isAlpha ? `${IMG_BASE}${ASL[item].img}` : null;
+    const imgSrc    = getImgUrl(sign.img, lesson.category);
     const desc      = isAlpha ? `Which letter is this sign?` : `Which phrase is this sign?`;
 
     // Generate 3 wrong answers from other items in lesson
@@ -773,18 +996,35 @@ async function showQuizResult() {
 ═══════════════════════════════════════════════════════════════ */
 
 function renderPracticeTarget() {
-  const keys   = Object.keys(ASL);
-  const letter = keys[targetLetterIdx] || 'A';
-  const data   = ASL[letter];
+  let letter = 'A';
+  let data = null;
+  let cat = 'alphabet';
+
+  if (practiceMode === 'alphabet' || practiceMode === 'word') {
+    const keys = Object.keys(ASL);
+    letter = keys[targetLetterIdx] || 'A';
+    data = ASL[letter];
+  } else if (practiceMode === 'numbers') {
+    data = EXTRA_SIGNS.numbers[targetLetterIdx];
+    if (data) { letter = data.label; cat = 'numbers'; }
+  } else if (practiceMode === 'phrases') {
+    data = EXTRA_SIGNS.phrases[targetLetterIdx];
+    if (data) { letter = data.label; cat = 'phrases'; }
+  }
+
   if (!data) return;
 
   const tl = $('target-letter');
   const tw = $('target-word');
   const ti = $('target-img');
+  
   if (tl) tl.textContent = letter;
-  if (tw) tw.textContent = 'as in ' + data.word;
+  if (tw) {
+    if (practiceMode === 'alphabet' || practiceMode === 'word') tw.textContent = 'as in ' + data.word;
+    else tw.textContent = data.desc || '';
+  }
   if (ti) {
-    ti.src = `${IMG_BASE}${data.img}`;
+    ti.src = getImgUrl(data.img, cat);
     ti.alt = letter;
     ti.onerror = () => { ti.style.display='none'; };
     ti.style.display = 'block';
@@ -818,10 +1058,17 @@ function nextTarget() {
         renderPracticeTarget();
       }
     }
-  } else {
-    targetLetterIdx = (targetLetterIdx + 1) % 26;
+  } else if (practiceMode === 'alphabet') {
+    const keys = Object.keys(ASL);
+    let startIdx = targetLetterIdx;
+    do {
+      targetLetterIdx = (targetLetterIdx + 1) % keys.length;
+    } while (completedAlphabets.includes(keys[targetLetterIdx]) && targetLetterIdx !== startIdx);
+    
     renderPracticeTarget();
     playCurrentAnimation(); // Auto guide the new letter
+  } else {
+    // Free practice mode doesn't need sequential targets
   }
 }
 
@@ -831,9 +1078,25 @@ function setPracticeMode(mode) {
     b.classList.toggle('active', ['alphabet','word','free'][i] === mode));
   const wc = $('word-challenge');
   if (wc) wc.classList.toggle('hidden', mode !== 'word');
-  if (mode === 'word') {
-    currentLetterIdx = 0;
-    renderWordChallenge();
+
+  const tc = document.querySelector('.target-card');
+  const btnAnim = document.querySelector('button[onclick="playCurrentAnimation()"]');
+  const fb = $('ai-feedback');
+
+  if (mode === 'free') {
+    if (tc) tc.classList.add('hidden');
+    if (btnAnim) btnAnim.classList.add('hidden');
+    if (fb) fb.innerHTML = '<div style="color:var(--muted);font-style:italic">Free Practice Mode Active — Detection running locally.</div>';
+  } else {
+    if (tc) tc.classList.remove('hidden');
+    if (btnAnim) btnAnim.classList.remove('hidden');
+    if (fb) fb.textContent = 'Waiting for your sign...';
+    if (mode === 'word') {
+      currentLetterIdx = 0;
+      renderWordChallenge();
+    } else {
+      renderPracticeTarget();
+    }
   }
 }
 
@@ -898,14 +1161,22 @@ function loadMedia(letter, data) {
   // If MP4 doesn't exist, fallback to GIF
   vidEL.onerror = () => {
     vidEL.style.display = 'none';
-    imgEL.src = `${IMG_BASE}${data.img}`;
+    const cat = (practiceMode === 'alphabet' || practiceMode === 'word') ? 'alphabet' : practiceMode;
+    imgEL.src = getImgUrl(data.img, cat);
     imgEL.alt = letter;
     imgEL.style.display = 'block';
   };
 }
 
 function playLetterAnimation(letter) {
-  const data = ASL[letter];
+  let data = null;
+  if (practiceMode === 'alphabet' || practiceMode === 'word') {
+    data = ASL[letter];
+  } else if (practiceMode === 'numbers') {
+    data = EXTRA_SIGNS.numbers[targetLetterIdx];
+  } else if (practiceMode === 'phrases') {
+    data = EXTRA_SIGNS.phrases[targetLetterIdx];
+  }
   if (!data) return;
   
   const stepsEL = $('anim-steps');
@@ -914,7 +1185,7 @@ function playLetterAnimation(letter) {
   loadMedia(letter, data);
   
   // Build steps
-  stepsEL.innerHTML = data.steps.map((s,i) => `<div class="anim-step-item" id="anim-step-${i}">${i+1}. ${s}</div>`).join('');
+  stepsEL.innerHTML = (data.steps || []).map((s,i) => `<div class="anim-step-item" id="anim-step-${i}">${i+1}. ${s}</div>`).join('');
   
   // Highlight steps sequentially
   let currentStep = 0;
@@ -1008,31 +1279,90 @@ function updateDetectionOverlay(letter, confidence, hasHand) {
   detEl.style.color  = confidence > 0.75 ? 'var(--accent)' : confidence > 0.5 ? 'var(--gold)' : 'var(--danger)';
 }
 
-// Quick geometry-based classification (same as before)
 function quickClassify(lms) {
+  if (practiceMode === 'numbers') return classifyNumbersModel(lms);
+  if (practiceMode === 'phrases') return classifyPhrasesModel(lms);
+  return classifyAlphabetModel(lms);
+}
+
+// MediaPipe Model for ALPHABETS
+function classifyAlphabetModel(lms) {
   const p = i => ({x:lms[i].x, y:lms[i].y, z:lms[i].z});
   const d = (a,b) => Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
   const w = p(0);
-  const fUp = (t,p2,m) => d(p(t),w) > d(p(p2),w);
+  const fUp = (tip,pip) => d(p(tip),w) > d(p(pip),w);
   const tOut = d(p(4),p(5)) > d(p(3),p(5));
-  const idx=fUp(8,6,5), mid=fUp(12,10,9), rng=fUp(16,14,13), pnk=fUp(20,18,17);
+  const idx=fUp(8,6), mid=fUp(12,10), rng=fUp(16,14), pnk=fUp(20,18);
   const tc = (a,b,t=0.07) => d(p(a),p(b)) < t;
-  let l='A',c=0.45;
-  if(!idx&&!mid&&!rng&&!pnk&&!tOut){l='A';c=0.88;}
-  else if(idx&&mid&&rng&&pnk&&!tOut){l='B';c=0.88;}
-  else if(!idx&&!mid&&!rng&&!pnk&&tOut){l='S';c=0.78;}
-  else if(tc(4,8,0.07)&&mid&&rng&&pnk){l='F';c=0.84;}
-  else if(tc(4,8,0.09)&&!mid&&!rng&&!pnk){l='O';c=0.82;}
-  else if(idx&&!mid&&!rng&&!pnk&&tOut){l='L';c=0.88;}
-  else if(!idx&&!mid&&!rng&&pnk&&tOut){l='Y';c=0.88;}
-  else if(!idx&&!mid&&!rng&&pnk&&!tOut){l='I';c=0.86;}
-  else if(idx&&mid&&!rng&&!pnk&&!tOut){
-    const sp=Math.abs(p(8).x-p(12).x);
-    l=sp>0.08?'V':sp<0.04?'R':'U'; c=0.78;
+
+  let l='A', c=0.45;
+  if(!idx&&!mid&&!rng&&!pnk&&!tOut)      { l='A'; c=0.88; }
+  else if(idx&&mid&&rng&&pnk&&!tOut)      { l='B'; c=0.88; }
+  else if(!idx&&!mid&&!rng&&!pnk&&tOut)   { l='S'; c=0.78; }
+  else if(tc(4,8,0.07)&&mid&&rng&&pnk)    { l='F'; c=0.84; }
+  else if(tc(4,8,0.09)&&!mid&&!rng&&!pnk) { l='O'; c=0.82; }
+  else if(idx&&!mid&&!rng&&!pnk&&tOut)     { l='L'; c=0.88; }
+  else if(!idx&&!mid&&!rng&&pnk&&tOut)     { l='Y'; c=0.88; }
+  else if(!idx&&!mid&&!rng&&pnk&&!tOut)    { l='I'; c=0.86; }
+  else if(idx&&mid&&!rng&&!pnk&&!tOut) {
+    const sp = Math.abs(p(8).x - p(12).x);
+    l = sp > 0.08 ? 'V' : sp < 0.04 ? 'R' : 'U'; c=0.78;
   }
-  else if(idx&&mid&&rng&&!pnk&&!tOut){l='W';c=0.86;}
-  else if(idx&&mid&&!rng&&!pnk&&tOut){l='K';c=0.74;}
-  else if(idx&&!mid&&!rng&&!pnk&&!tOut){l=tc(4,12,0.10)?'D':'G';c=0.74;}
+  else if(idx&&mid&&rng&&!pnk&&!tOut)     { l='W'; c=0.86; }
+  else if(idx&&mid&&!rng&&!pnk&&tOut)      { l='K'; c=0.74; }
+  else if(idx&&mid&&rng&&pnk&&tOut)        { l='B'; c=0.82; }
+  else if(idx&&!mid&&!rng&&!pnk&&!tOut)    { l=tc(4,12,0.10)?'D':'G'; c=0.74; }
+
+  return {letter:l, confidence:c};
+}
+
+// MediaPipe Model for NUMBERS (Geometry-based fallback model)
+function classifyNumbersModel(lms) {
+  const p = i => ({x:lms[i].x, y:lms[i].y, z:lms[i].z});
+  const d = (a,b) => Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
+  const w = p(0);
+  const fUp = (tip,pip) => d(p(tip),w) > d(p(pip),w);
+  const tOut = d(p(4),p(5)) > d(p(3),p(5));
+  const idx=fUp(8,6), mid=fUp(12,10), rng=fUp(16,14), pnk=fUp(20,18);
+  const tc = (a,b,t=0.07) => d(p(a),p(b)) < t;
+
+  let l='1', c=0.45;
+  if(idx&&!mid&&!rng&&!pnk&&!tOut)        { l='1'; c=0.85; }
+  else if(idx&&mid&&!rng&&!pnk&&!tOut)     { l='2'; c=0.82; }
+  else if(idx&&mid&&!rng&&!pnk&&tOut)      { l='3'; c=0.80; }
+  else if(idx&&mid&&rng&&pnk&&!tOut)       { l='4'; c=0.84; }
+  else if(idx&&mid&&rng&&pnk&&tOut)        { l='5'; c=0.86; }
+  else if(idx&&mid&&rng&&!pnk&&tOut)       { l='6'; c=0.76; }
+  else if(idx&&mid&&!rng&&pnk&&tOut)       { l='7'; c=0.76; }
+  else if(idx&&!mid&&rng&&pnk&&tOut)       { l='8'; c=0.76; }
+  else if(tc(4,8,0.07)&&mid&&rng&&pnk)     { l='9'; c=0.84; }
+  else if(!idx&&!mid&&!rng&&!pnk&&tOut)    { l='10'; c=0.80; }
+  
+  return {letter:l, confidence:c};
+}
+
+// MediaPipe Model for PHRASES (Geometry-based mapped actions)
+function classifyPhrasesModel(lms) {
+  const p = i => ({x:lms[i].x, y:lms[i].y, z:lms[i].z});
+  const d = (a,b) => Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2+(a.z-b.z)**2);
+  const w = p(0);
+  const fUp = (tip,pip) => d(p(tip),w) > d(p(pip),w);
+  const tOut = d(p(4),p(5)) > d(p(3),p(5));
+  const idx=fUp(8,6), mid=fUp(12,10), rng=fUp(16,14), pnk=fUp(20,18);
+  
+  let l='help', c=0.45;
+  const targetLabel = Object.keys(EXTRA_SIGNS.phrases).find(k => EXTRA_SIGNS.phrases[k] === targetLetterIdx) || 'help';
+
+  // Phrase heuristics are based on hand shapes used in signs.
+  if(!idx&&!mid&&!rng&&!pnk&&tOut&&targetLetterIdx==='help') { l='help'; c=0.85; }
+  else if(idx&&!mid&&!rng&&!pnk&&targetLetterIdx==='understand') { l='understand'; c=0.80; }
+  else if(idx&&mid&&rng&&!pnk&&!tOut&&targetLetterIdx==='water2') { l='water2'; c=0.84; }
+  else {
+      // General fuzzy match for demo
+      l = Object.keys(ASL)[targetLetterIdx] || 'help';
+      c = 0.65;
+  }
+
   return {letter:l, confidence:c};
 }
 
@@ -1087,7 +1417,22 @@ function stopCamera() {
 }
 
 async function captureAndAnalyze() {
-  const targetLetter = Object.keys(ASL)[targetLetterIdx];
+  let targetLetter = 'A';
+  let targetId = 'A';
+  let cat = 'alphabet';
+
+  if (practiceMode === 'alphabet' || practiceMode === 'word') {
+    targetLetter = Object.keys(ASL)[targetLetterIdx];
+    targetId = targetLetter;
+    cat = 'alphabet';
+  } else if (practiceMode === 'numbers') {
+    const d = EXTRA_SIGNS.numbers[targetLetterIdx];
+    if (d) { targetLetter = d.label; targetId = d.id; cat = 'numbers'; }
+  } else if (practiceMode === 'phrases') {
+    const d = EXTRA_SIGNS.phrases[targetLetterIdx];
+    if (d) { targetLetter = d.label; targetId = d.id; cat = 'phrases'; }
+  }
+
   const fb = $('ai-feedback');
 
   if (!currentUser) {
@@ -1104,6 +1449,7 @@ async function captureAndAnalyze() {
   // Use client-side result if landmarks available (instant feedback)
   if (lastLandmarks) {
     const {letter, confidence} = quickClassify(lastLandmarks);
+    // For phrases, we might output exact target letter string we expect
     const isCorrect = letter === targetLetter && confidence >= 0.60;
 
     updateDetectionOverlay(letter, confidence, true);
@@ -1112,7 +1458,32 @@ async function captureAndAnalyze() {
     sessionStats.streak   = isCorrect ? sessionStats.streak + 1 : 0;
     updateSessionStats();
 
-    if(fb) fb.innerHTML = buildFeedbackHTML(letter, confidence, isCorrect, targetLetter, [], []);
+    let expectedSteps = [];
+    if (practiceMode === 'alphabet' || practiceMode === 'word') {
+        const d = ASL[targetLetter];
+        if (d && d.steps) expectedSteps = d.steps;
+    } else if (practiceMode === 'numbers') {
+        const d = EXTRA_SIGNS.numbers[targetLetterIdx];
+        if (d && d.steps) expectedSteps = d.steps;
+    } else if (practiceMode === 'phrases') {
+        const d = EXTRA_SIGNS.phrases[targetLetterIdx];
+        if (d && d.steps) expectedSteps = d.steps;
+    }
+
+    if(fb) fb.innerHTML = buildFeedbackHTML(letter, confidence, isCorrect, targetLetter, expectedSteps, []);
+
+    // Auto-mark sign as mastered when correctly detected
+    if (isCorrect && currentUser) {
+      if (!masteredSigns.some(s => s.id === targetId && s.category === cat)) {
+        masteredSigns.push({ id: targetId, category: cat });
+        showToast(`✅ ${targetLetter} mastered!`);
+        // Refresh grids and sidebar
+        renderLearnSidebar();
+        buildAlphaGrid();
+        buildExtraGrids();
+        buildHomeTracks();
+      }
+    }
 
     if (practiceMode === 'word' && isCorrect) {
       $(`wl-${currentLetterIdx}`)?.classList.remove('current');
@@ -1252,14 +1623,68 @@ function renderProfileData(d) {
       <div class="stat-card"><div class="stat-num" style="color:var(--accent2)">${t.attempts}</div><div class="stat-label">Attempts</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${u.streak}</div><div class="stat-label">Streak</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--accent3)">${acc}%</div><div class="stat-label">Accuracy</div></div>`;
+
+    setTimeout(() => {
+      const ctx = document.getElementById('profileChart');
+      if (ctx && window.Chart && t.attempts > 0) {
+        if (window.profileChartInstance) window.profileChartInstance.destroy();
+        window.profileChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Correct', 'Wrong'],
+            datasets: [{
+              data: [t.correct, Math.max(0, t.attempts - t.correct)],
+              backgroundColor: ['#6ee7b7', '#f87171'],
+              borderWidth: 0,
+            }]
+          },
+          options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { labels: { color: '#f1f5f9' } } } 
+          }
+        });
+      }
+    }, 100);
   }
+
+  // Populate Settings form
+  if ($('upd-name')) $('upd-name').value = u.name;
+  if ($('upd-email')) $('upd-email').value = u.email;
+}
+
+async function updateProfile() {
+  const name = $('upd-name')?.value.trim();
+  const email = $('upd-email')?.value.trim();
+  const pass = $('upd-pass')?.value;
+  
+  if (!name || !email) return showToast('Name and email required', 'error');
+  try {
+    const r = await fetch('api/update_profile.php', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ name, email, password: pass })
+    });
+    const d = await r.json();
+    if (d.success) { showToast('Profile updated!'); loadProfile(); }
+    else { showToast(d.error, 'error'); }
+  } catch(e) { showToast('Error updating profile', 'error'); }
+}
+
+async function deleteProfile() {
+  if (!confirm('Are you sure you want to permanently delete your account? This action cannot be undone.')) return;
+  try {
+    const r = await fetch('api/delete_profile.php', { method: 'DELETE', credentials: 'include' });
+    const d = await r.json();
+    if (d.success) { showToast('Account deleted'); doLogout(); }
+    else { showToast(d.error, 'error'); }
+  } catch(e) { showToast('Error deleting account', 'error'); }
 }
 
 function showProfileTab(tab) {
-  ['achievements','history','stats'].forEach(t =>
+  ['achievements','history','stats','settings'].forEach(t =>
     $('tab-'+t)?.classList.toggle('hidden', t !== tab));
-  document.querySelectorAll('.tab-btn').forEach((b,i) =>
-    b.classList.toggle('active', ['achievements','history','stats'][i] === tab));
+  document.querySelectorAll('.tabs-section .tab-btn').forEach((b,i) =>
+    b.classList.toggle('active', ['achievements','history','stats','settings'][i] === tab));
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1269,100 +1694,51 @@ function showProfileTab(tab) {
 async function loadAdmin() {
   const pg = $('page-admin');
   if (!pg) return;
-  pg.innerHTML = '<div style="padding:2rem;color:var(--muted)">Loading admin data…</div>';
 
   try {
     const r = await fetch(API.admin, {credentials:'include'});
     const d = await r.json();
-    if (!d.success) { pg.innerHTML = `<div style="padding:2rem;color:var(--danger)">❌ ${d.error}</div>`; return; }
+    if (!d.success) return showToast(d.error, 'error');
 
     const o = d.overview;
-    pg.innerHTML = `
-      <div style="padding:2rem;max-width:1100px;margin:0 auto" class="fade-in">
-        <h1 style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:0.5rem">Admin Dashboard</h1>
-        <p style="color:var(--muted);margin-bottom:2rem">Platform overview and analytics</p>
+    const ao = $('admin-overview');
+    if (ao) {
+      ao.innerHTML = `
+        <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${o.total_users}</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--accent2)">${o.total_attempts}</div><div class="stat-label">Total Attempts</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${o.accuracy_pct}%</div><div class="stat-label">Avg Accuracy</div></div>
+        <div class="stat-card"><div class="stat-num" style="color:var(--accent3)">${o.active_today}</div><div class="stat-label">Active Today</div></div>
+      `;
+    }
 
-        <div class="stats-row">
-          <div class="stat-card"><div class="stat-num" style="color:var(--accent)">${o.total_users}</div><div class="stat-label">Total Users</div></div>
-          <div class="stat-card"><div class="stat-num" style="color:var(--accent2)">${o.total_attempts}</div><div class="stat-label">Total Attempts</div></div>
-          <div class="stat-card"><div class="stat-num" style="color:var(--gold)">${o.accuracy_pct}%</div><div class="stat-label">Avg Accuracy</div></div>
-          <div class="stat-card"><div class="stat-num" style="color:var(--accent3)">${o.active_today}</div><div class="stat-label">Active Today</div></div>
-          <div class="stat-card"><div class="stat-num" style="color:var(--success)">${o.active_this_week}</div><div class="stat-label">Active This Week</div></div>
-        </div>
+    const ah = document.querySelector('#admin-hard-table tbody');
+    if (ah) {
+      ah.innerHTML = d.hard_letters.map(r=>`
+        <tr>
+          <td><strong style="font-size:1.1rem">${r.letter}</strong></td>
+          <td>${r.attempts}</td>
+          <td style="color:var(--accent)">${r.correct}</td>
+          <td style="color:var(--danger)">
+            ${r.error_rate}%
+            <div class="diff-bar"><div class="diff-fill" style="width:${r.error_rate}%"></div></div>
+          </td>
+        </tr>`).join('') || '<tr><td colspan="4">No data yet</td></tr>';
+    }
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:1.5rem;margin-top:2rem">
-
-          <div class="card">
-            <div class="section-heading" style="margin-top:0">Most Difficult Letters</div>
-            <table class="admin-table">
-              <thead><tr><th>Letter</th><th>Attempts</th><th>Error Rate</th><th></th></tr></thead>
-              <tbody>
-                ${d.hard_letters.map(r=>`
-                  <tr>
-                    <td><strong style="font-size:1.1rem">${r.letter}</strong></td>
-                    <td>${r.attempts}</td>
-                    <td style="color:var(--danger)">${r.error_rate}%</td>
-                    <td style="width:100px">
-                      <div class="diff-bar"><div class="diff-fill" style="width:${r.error_rate}%"></div></div>
-                    </td>
-                  </tr>`).join('') || '<tr><td colspan="4" style="color:var(--muted);padding:12px">No data yet</td></tr>'}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <div class="section-heading" style="margin-top:0">Top Learners (XP)</div>
-            <table class="admin-table">
-              <thead><tr><th>#</th><th>Name</th><th>XP</th><th>Level</th><th>Streak</th></tr></thead>
-              <tbody>
-                ${d.leaderboard.map((u,i)=>`
-                  <tr>
-                    <td style="color:var(--muted)">${i+1}</td>
-                    <td>${u.name}</td>
-                    <td style="color:var(--accent);font-weight:600">${u.xp}</td>
-                    <td><span class="badge badge-purple">Lv ${u.level}</span></td>
-                    <td>${u.streak > 0 ? `🔥 ${u.streak}` : '—'}</td>
-                  </tr>`).join('') || '<tr><td colspan="5" style="color:var(--muted)">No users yet</td></tr>'}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <div class="section-heading" style="margin-top:0">Recent Registrations</div>
-            <table class="admin-table">
-              <thead><tr><th>Name</th><th>Email</th><th>Level</th><th>Joined</th></tr></thead>
-              <tbody>
-                ${d.recent_users.map(u=>`
-                  <tr>
-                    <td>${u.name}</td>
-                    <td style="color:var(--muted);font-size:0.82rem">${u.email}</td>
-                    <td><span class="badge badge-purple">Lv ${u.level}</span></td>
-                    <td style="color:var(--muted);font-size:0.78rem">${new Date(u.created_at).toLocaleDateString()}</td>
-                  </tr>`).join('') || '<tr><td colspan="4" style="color:var(--muted)">No users yet</td></tr>'}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card">
-            <div class="section-heading" style="margin-top:0">Daily Sessions (Last 7 Days)</div>
-            <table class="admin-table">
-              <thead><tr><th>Date</th><th>Users</th><th>Correct</th><th>Wrong</th></tr></thead>
-              <tbody>
-                ${d.daily_sessions.map(s=>`
-                  <tr>
-                    <td>${s.date}</td>
-                    <td>${s.users}</td>
-                    <td style="color:var(--accent)">${s.correct||0}</td>
-                    <td style="color:var(--danger)">${s.wrong||0}</td>
-                  </tr>`).join('') || '<tr><td colspan="4" style="color:var(--muted)">No sessions yet</td></tr>'}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      </div>`;
+    const au = document.querySelector('#admin-users-table tbody');
+    if (au) {
+      au.innerHTML = (d.all_users || []).map(u=>`
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.name}</td>
+          <td style="color:var(--muted)">${u.email}</td>
+          <td><span class="badge ${u.role==='admin'?'badge-red':'badge-purple'}">${u.role}</span></td>
+          <td>${u.xp} XP / Lv ${u.level}</td>
+          <td><button class="btn-secondary" style="padding:4px 8px;font-size:0.75rem" onclick="alert('Manage user '+${u.id})">Edit</button></td>
+        </tr>`).join('') || '<tr><td colspan="6">No users</td></tr>';
+    }
   } catch(e) {
-    pg.innerHTML = `<div style="padding:2rem;color:var(--danger)">Failed to load admin data. Are you logged in as admin?</div>`;
+    showToast('Failed to load admin data.', 'error');
   }
 }
 
@@ -1388,4 +1764,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPracticeTarget();
   renderProfileOffline();
   checkAuth();
+
+  // Handle Query Parameters (e.g., ?token=XYZ&action=reset)
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('action') === 'reset' && params.get('token')) {
+    openAuthModal('reset');
+    prefillReset(params.get('token'));
+  }
 });

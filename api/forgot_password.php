@@ -1,7 +1,7 @@
 <?php
 // api/forgot_password.php
 // POST { "email": "..." }
-// Creates a reset token. In production, email it. Here we return it directly.
+// Demo mode: returns token directly in JSON response (no email sent).
 require_once __DIR__ . '/../config/helpers.php';
 require_once __DIR__ . '/../config/db.php';
 
@@ -11,13 +11,13 @@ $email = inputJson('email');
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) jsonErr('Invalid email address.');
 
 $db   = getDB();
-$stmt = $db->prepare('SELECT id FROM users WHERE email = ?');
+$stmt = $db->prepare('SELECT id, name FROM users WHERE email = ?');
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 
 // Always respond OK to prevent email enumeration
 if (!$user) {
-    jsonOk(['message' => 'If that email exists, a reset link has been sent.', 'token' => null]);
+    jsonOk(['message' => 'If that email exists, a reset link has been sent.']);
 }
 
 // Generate a secure token
@@ -32,10 +32,9 @@ $db->prepare(
     'INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)'
 )->execute([$email, $token, $expiresAt]);
 
-// In a real app: send email with link. Here: return token directly for demo.
+// Demo mode: return token directly in JSON (no PHPMailer dependency).
+// In production, you'd send an email instead.
 jsonOk([
-    'message' => 'Password reset token generated. Use it at /api/reset_password.php',
-    'token'   => $token,  // In production, send via email only
-    'expires' => $expiresAt,
-    'demo_note' => 'In production, remove the token from this response and email it instead.',
+    'message' => 'Reset token generated! Use it to set a new password.',
+    'token'   => $token,
 ]);
